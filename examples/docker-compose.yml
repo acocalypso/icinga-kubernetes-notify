@@ -1,0 +1,23 @@
+# Minimal example: run icinga-kubernetes-notify next to an existing Icinga for Kubernetes
+# database and Icinga Notifications daemon. Adjust hosts in config.yml and put the two
+# passwords into the secret files.
+services:
+  icinga-kubernetes-notify:
+    build: ..
+    restart: unless-stopped
+    volumes:
+      - ./config.yml:/etc/icinga-kubernetes-notify/config.yml:ro
+    environment:
+      IKN_DATABASE_PASSWORD_FILE: /run/secrets/kubernetes_db_password
+      IKN_NOTIFICATIONS_PASSWORD_FILE: /run/secrets/notifications_source_password
+    secrets:
+      - kubernetes_db_password
+      - notifications_source_password
+    ports:
+      - "127.0.0.1:8080:8080"   # /healthz and /metrics
+
+secrets:
+  kubernetes_db_password:
+    file: ./secrets/kubernetes_db_password
+  notifications_source_password:
+    file: ./secrets/notifications_source_password

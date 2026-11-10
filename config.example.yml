@@ -1,0 +1,58 @@
+# icinga-kubernetes-notify configuration.
+# Secrets can also be supplied through the environment (IKN_DATABASE_PASSWORD,
+# IKN_NOTIFICATIONS_PASSWORD) or read from files (password_file).
+
+# The Icinga for Kubernetes database. A user with SELECT permission is sufficient.
+database:
+  host: mysql.example.com
+  port: 3306
+  database: kubernetes
+  user: kubernetes_ro
+  password_file: /run/secrets/kubernetes-db-password
+  tls: false
+
+# The Icinga Notifications daemon. Username and password are those of a source that you
+# create in Icinga Web under Notifications -> Configuration -> Sources
+# (type "kubernetes-bridge", authentication "username and password").
+notifications:
+  url: https://notifications.example.com:5680
+  username: kubernetes-notify
+  password_file: /run/secrets/notifications-source-password
+  # ca_file: /etc/ssl/private-ca.pem
+  # Base URL of Icinga Web; notifications then link to the object in Icinga for Kubernetes Web.
+  icingaweb_url: https://icinga.example.com/icingaweb2
+  timeout: 10s
+
+watch:
+  # How often the database is read.
+  interval: 15s
+
+  # Which kinds are reported: deployment, statefulset, daemonset, replicaset, node, job,
+  # cronjob, pod. Pods are short-lived; prefer the owning workload unless you need them.
+  kinds: [deployment, statefulset, daemonset, node, job, cronjob]
+
+  # Icinga for Kubernetes state -> notification severity (warning, error, critical).
+  # States that are not listed do not raise a problem.
+  severity:
+    critical: critical
+    unknown: error      # a node that stops reporting is "unknown"
+    # warning: warning  # e.g. a job that reached its backoff limit
+
+  # Limit to certain clusters or namespaces (glob patterns). Empty means everything.
+  clusters: []
+  namespaces: []
+  exclude_namespaces: []
+
+  # A problem must persist this long before it is reported. Absorbs rollouts and
+  # crash loops that alternate between ok and critical.
+  for: 2m
+  # An object must be healthy this long before the recovery is reported.
+  recover_after: 1m
+  # An object with an open problem that was deleted is closed after this time.
+  gone_after: 5m
+  # If the Icinga for Kubernetes daemon has not written a heartbeat for this long, a
+  # problem is raised for the cluster and all object states are frozen.
+  daemon_stale_after: 2m
+
+# Health (/healthz) and metrics (/metrics) endpoint. Empty string disables it.
+listen: ":8080"

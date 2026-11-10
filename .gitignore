@@ -1,0 +1,5 @@
+# Local toolchain, test environment and working notes are not part of the repository.
+/.tools/
+/local/
+/bin/
+*.exe

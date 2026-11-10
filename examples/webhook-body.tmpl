@@ -1,0 +1,14 @@
+{
+  "version": "1",
+  "event": "{{if .Incident.IsRecovered}}recovery{{else}}problem{{end}}",
+  "severity": {{json .Incident.Severity}},
+  "cluster": {{json (index .Object.Tags "cluster")}},
+  "namespace": {{json (index .Object.Tags "namespace")}},
+  "kind": {{json (index .Object.Tags "kind")}},
+  "name": {{json (index .Object.Tags "name")}},
+  "summary": {{json .Event.Summary}},
+  "details": {{json .Event.Message}},
+  "incident_started_at": {{json .Incident.StartedAt}},
+  "event_time": {{json .Event.Time}},
+  "url": {{json .Object.Url}}
+}
